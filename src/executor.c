@@ -70,31 +70,23 @@ void run_single(Command cmd) {
 
   // built in: update
 if (strcmp(cmd.name, "update") == 0) {
-    printf("checking for updates...\n");
+    char pathbuf[1024];
+    uint32_t size = sizeof(pathbuf);
+
+    if (_NSGetExecutablePath(pathbuf, &size) == 0) {
+        // check if installed in Homebrew directory
+        if (strstr(pathbuf, "/homebrew/") || strstr(pathbuf, "/opt/homebrew/")) {
+            printf("ohsh is installed via Homebrew.\n");
+            printf("Run: brew upgrade ohsh\n");
+            return;
+        }
+    }
+
+    printf("Running self-update...\n");
     fflush(stdout);
 
-    // get the download url of the latest release binary
-    int result = system(
-        "curl -s https://api.github.com/repos/gabex47/ohsh/releases/latest "
-        "| grep browser_download_url "
-        "| cut -d '\"' -f 4 "
-        "> /tmp/ohsh_url.txt"
-    );
-
-    // read the url from the file
-    FILE *f = fopen("/tmp/ohsh_url.txt", "r");
-    if (!f) {
-        printf("ohsh: could not check for updates\n");
-        return;
-    }
-
-    char url[1024];
-    if (!fgets(url, sizeof(url), f)) {
-        printf("ohsh: no releases found\n");
-        fclose(f);
-        return;
-    }
-    fclose(f);
+    // your existing update logic here
+}
 
     // strip newline
     url[strcspn(url, "\n")] = 0;
